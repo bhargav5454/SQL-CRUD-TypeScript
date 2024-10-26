@@ -1,6 +1,6 @@
 import { Route, Routes } from "react-router-dom";
-import PublicRoutes from "./routes/Public/Publicroutes";
-import PrivateRoutes from "./routes/Private/Priveteroutes";
+import PublicRoutes from "./Routes/Public/Publicroutes";
+import PrivateRoutes from "./Routes/Private/Priveteroutes";
 import { useSelector } from "react-redux";
 import { useEffect } from "react";
 import Cookies from 'js-cookie'
