@@ -1,6 +1,6 @@
 import React from 'react'
 
-const Errorpage = () => {
+const Errorpage :React.FC = () => {
     const handleNavigate = () => {
         window.location.href = '/';
     }
