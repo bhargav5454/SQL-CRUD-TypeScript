@@ -10,12 +10,11 @@ import ProductForm from "../../Pages/Private_pages/ProductForm";
 
 const PrivateRoutes = () => {
 
-    const { error } = useSelector((state) => state.productData);
+    const { error } = useSelector((state :any) => state.productData);
 
     if (error && error.includes('Unauthorized')) {
         return <SessionExpiredPopup />;
     }
-
 
     return (
         <>
