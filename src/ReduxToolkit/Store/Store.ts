@@ -25,6 +25,8 @@ const reduxStore = configureStore({
             },
         }),
 });
+export type RootState = ReturnType<typeof reduxStore.getState>;
+export type AppDispatch = typeof reduxStore.dispatch;
 
 export const persistor = persistStore(reduxStore);
 export default reduxStore;
