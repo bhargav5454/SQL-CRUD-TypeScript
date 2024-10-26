@@ -3,7 +3,6 @@ import { AlertCircle } from 'lucide-react'
 import { useDispatch } from 'react-redux'
 import { logout } from '../ReduxToolkit/Slice/User.slice'
 import { persistor } from '../ReduxToolkit/Store/Store'
-import toast from 'react-hot-toast'
 import './components.css'
 
 const SessionExpiredPopup = () => {

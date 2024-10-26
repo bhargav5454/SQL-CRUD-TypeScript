@@ -7,7 +7,7 @@ import productReducer from "../Slice/Product.slice";
 const persistConfig = {
     key: 'root',
     storage,
-    whitelist: ['AuthToken'],
+    whitelist: ['AuthToken'], 
 };
 
 const persistedReducer = persistReducer(persistConfig, userReducer);

@@ -1,8 +1,7 @@
 import React, { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
-import { handleLoginuser } from '../../ReduxToolkit/Slice/User.slice'
-import toast from 'react-hot-toast'
+import { handleLoginUser } from '../../ReduxToolkit/Slice/User.slice'
 
 
 const Login = () => {
@@ -17,7 +16,7 @@ const Login = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault()
-        dispatch(handleLoginuser({ endpoint: 'user/login', payload: formData }))
+        dispatch(handleLoginUser({ endpoint: 'user/login', payload: formData }))
     }
     return (
         <>
