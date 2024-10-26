@@ -15,7 +15,7 @@ interface Product {
 interface ProductState {
   product: Product[];
   loading: boolean;
-  error: string | null;
+  error: any | null;
 }
 
 const initialState: ProductState = {
@@ -26,7 +26,7 @@ const initialState: ProductState = {
 
 interface AddProductData {
   endpoint: string;
-  payload: Omit<Product, 'id'>;
+  payload: Omit<Product, "id">;
 }
 
 interface FetchProductData {
@@ -114,60 +114,76 @@ const productSlice = createSlice({
   initialState,
   reducers: {},
   extraReducers: (builder) => {
-    builder.addCase(addproduct.pending, (state) => {
-      state.loading = true;
-      state.error = null;
-    });
-    builder.addCase(addproduct.fulfilled, (state, action: PayloadAction<{ data: Product }>) => {
-      state.loading = false;
-      state.product = state.product.concat(action.payload.data);
-    });
-    builder.addCase(addproduct.rejected, (state, action) => {
-      state.loading = false;
-      state.error = action.payload as string;
-    });
+    builder
+      .addCase(addproduct.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(
+        addproduct.fulfilled,
+        (state, action: PayloadAction<{ data: Product }>) => {
+          state.loading = false;
+          state.product = state.product.concat(action.payload.data);
+        }
+      )
+      .addCase(addproduct.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(fetchProduct.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(
+        fetchProduct.fulfilled,
+        (state, action: PayloadAction<{ data: Product[] }>) => {
+          state.loading = false;
+          state.product = action.payload.data;
+        }
+      )
+      .addCase(fetchProduct.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      });
 
-    builder.addCase(fetchProduct.pending, (state) => {
-      state.loading = true;
-      state.error = null;
-    });
-    builder.addCase(fetchProduct.fulfilled, (state, action: PayloadAction<{ data: Product[] }>) => {
-      state.loading = false;
-      state.product = action.payload.data;
-    });
-    builder.addCase(fetchProduct.rejected, (state, action) => {
-      state.loading = false;
-      state.error = action.payload as string;
-    });
+    builder
+      .addCase(deleteProduct.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(
+        deleteProduct.fulfilled,
+        (state, action: PayloadAction<{ data: Product }>) => {
+          state.loading = false;
+          state.product = state.product.filter(
+            (product) => product.id !== action.payload.data.id
+          );
+        }
+      )
+      .addCase(deleteProduct.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      });
 
-    builder.addCase(deleteProduct.pending, (state) => {
-      state.loading = true;
-      state.error = null;
-    });
-    builder.addCase(deleteProduct.fulfilled, (state, action: PayloadAction<{ data: Product }>) => {
-      state.loading = false;
-      state.product = state.product.filter((product) => product.id !== action.payload.data.id);
-    });
-    builder.addCase(deleteProduct.rejected, (state, action) => {
-      state.loading = false;
-      state.error = action.payload as string;
-    });
-
-    builder.addCase(updateProduct.pending, (state) => {
-      state.loading = true;
-      state.error = null;
-    });
-    builder.addCase(updateProduct.fulfilled, (state, action: PayloadAction<{ data: Product }>) => {
-      state.loading = false;
-      const updatedProduct = action.payload.data;
-      state.product = state.product.map((product) =>
-        product.id === updatedProduct.id ? updatedProduct : product
-      );
-    });
-    builder.addCase(updateProduct.rejected, (state, action) => {
-      state.loading = false;
-      state.error = action.payload as string;
-    });
+    builder
+      .addCase(updateProduct.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(
+        updateProduct.fulfilled,
+        (state, action: PayloadAction<{ data: Product }>) => {
+          state.loading = false;
+          const updatedProduct = action.payload.data;
+          state.product = state.product.map((product) =>
+            product.id === updatedProduct.id ? updatedProduct : product
+          );
+        }
+      )
+      .addCase(updateProduct.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      });
   },
 });
 
