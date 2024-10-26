@@ -1,6 +1,6 @@
 import { Route, Routes } from "react-router-dom";
 import Login from "../../Pages/Public_pages/Login"; // Ensure the path is correct
-import Signup from "../../pages/Public_pages/Signup"; // Ensure the path is correct
+import Signup from "../../Pages/Public_pages/Signup"; // Ensure the path is correct
 import PublicRoute from "./Publicroute";
 import Errorpage from "../../Components/Errorpage";
 
