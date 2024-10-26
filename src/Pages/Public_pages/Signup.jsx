@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom"
-import { handleSignupuser } from "../../ReduxToolkit/Slice/User.slice";
+import { handleSignupUser } from "../../ReduxToolkit/Slice/User.slice";
 
 const Signup = () => {
 
@@ -13,7 +13,7 @@ const Signup = () => {
   }
   const handleSubmit = (e) => {
     e.preventDefault();
-    dispatch(handleSignupuser({ endpoint: '/user/create', payload: FormData }))
+    dispatch(handleSignupUser({ endpoint: '/user/create', payload: FormData }))
     
   }
   return (
