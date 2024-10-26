@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useEffect } from "react";
+import React, { Fragment, useState, useEffect, ChangeEvent, FormEvent } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   deleteProduct,
@@ -8,44 +8,60 @@ import {
 import { Edit, Trash2, X } from "lucide-react";
 import "./Product.css";
 import axios from "axios";
+import { AppDispatch } from "../../ReduxToolkit/Store/Store";
+import { RootState } from "../../ReduxToolkit/Store/Store"; // Make sure to define RootState in your store
 
-const ProductList = () => {
-    const [editModalOpen, setEditModalOpen] = useState(false);
-    const [editingProduct, setEditingProduct] = useState(null);
-    const [quantities, setQuantities] = useState({});
-    const dispatch = useDispatch();
-    const { product } = useSelector((state) => state.productData);
+interface FormData {
+  id?: string; // Add 'id' to FormData to handle editing
+  name: string;
+  price: number;
+  description: string;
+  quantity: number;
+  category: string;
+}
+
+const ProductList: React.FC = () => {
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<FormData>({
+    name: "",
+    price: 0,
+    description: "",
+    quantity: 1,
+    category: "",
+  });
+  const dispatch = useDispatch<AppDispatch>();
+  const product = useSelector((state: RootState) => state.productData.product);
 
   useEffect(() => {
     dispatch(fetchProduct({ endpoint: "/product/getAll" }));
   }, [dispatch]);
 
-  const openEditModal = (product) => {
+  const openEditModal = (product: FormData) => {
     setEditingProduct(product);
     setEditModalOpen(true);
   };
 
-  const handleEditChange = (e) => {
+  const handleEditChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setEditingProduct({ ...editingProduct, [e.target.name]: e.target.value });
   };
 
-  const handleEditSubmit = (e) => {
+  const handleEditSubmit = (e: FormEvent) => {
+    e.preventDefault();
     dispatch(
       updateProduct({
         endpoint: "/product/update",
-        productId: editingProduct.id,
+        productId: editingProduct.id as string,
         payload: editingProduct,
       })
     );
-    e.preventDefault();
     setEditModalOpen(false);
   };
 
-  const handleDelete = (productId) => {
+  const handleDelete = (productId: string) => {
     dispatch(deleteProduct({ endpoint: "/product/delete", productId }));
   };
 
-  const handleAddtoCart = (item) => {
+  const handleAddtoCart = (item: FormData) => {
     const payload = {
       productId: item.id,
       quantity: 1,
@@ -80,7 +96,7 @@ const ProductList = () => {
                     <button
                       className="text-gray-600 hover:text-red-500"
                       aria-label="Delete Product"
-                      onClick={() => handleDelete(item.id)}
+                      onClick={() => handleDelete(item.id!)}
                     >
                       <Trash2 size={20} />
                     </button>
@@ -118,7 +134,7 @@ const ProductList = () => {
       {/* Edit Modal */}
       {editModalOpen && (
         <div className="fixed inset-0 backdrop-blur-md bg-black bg-opacity-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg shadow-2xl max-w-md w-full transform transition-transform duration-300 scale-95 opacity-0 animate-modalIn border-2 ">
+          <div className="bg-white rounded-lg shadow-2xl max-w-md w-full transform transition-transform duration-300 scale-95 opacity-0 animate-modalIn border-2">
             <div className="flex justify-between items-center p-6 border-b">
               <h2 className="text-xl font-semibold">Edit Product</h2>
               <button
@@ -128,13 +144,10 @@ const ProductList = () => {
                 <X size={24} />
               </button>
             </div>
-            <form onSubmit={handleEditSubmit} className="p-6 ">
+            <form onSubmit={handleEditSubmit} className="p-6">
               <div className="space-y-4">
                 <div>
-                  <label
-                    htmlFor="edit-name"
-                    className="block text-sm font-medium text-gray-700"
-                  >
+                  <label htmlFor="edit-name" className="block text-sm font-medium text-gray-700">
                     Name
                   </label>
                   <input
@@ -147,26 +160,20 @@ const ProductList = () => {
                   />
                 </div>
                 <div>
-                  <label
-                    htmlFor="edit-description"
-                    className="block text-sm font-medium text-gray-700"
-                  >
+                  <label htmlFor="edit-description" className="block text-sm font-medium text-gray-700">
                     Description
                   </label>
                   <textarea
                     name="description"
                     id="edit-description"
-                    rows="3"
+                    rows={3}
                     value={editingProduct.description}
                     onChange={handleEditChange}
                     className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-gray-500 focus:ring focus:ring-gray-300 focus:ring-opacity-50 p-3 text-lg"
                   ></textarea>
                 </div>
                 <div>
-                  <label
-                    htmlFor="edit-price"
-                    className="block text-sm font-medium text-gray-700"
-                  >
+                  <label htmlFor="edit-price" className="block text-sm font-medium text-gray-700">
                     Price
                   </label>
                   <input
@@ -179,10 +186,7 @@ const ProductList = () => {
                   />
                 </div>
                 <div>
-                  <label
-                    htmlFor="edit-category"
-                    className="block text-sm font-medium text-gray-700"
-                  >
+                  <label htmlFor="edit-category" className="block text-sm font-medium text-gray-700">
                     Category
                   </label>
                   <select
@@ -201,10 +205,7 @@ const ProductList = () => {
                   </select>
                 </div>
                 <div>
-                  <label
-                    htmlFor="edit-quantity"
-                    className="block text-sm font-medium text-gray-700"
-                  >
+                  <label htmlFor="edit-quantity" className="block text-sm font-medium text-gray-700">
                     Quantity
                   </label>
                   <input
@@ -217,14 +218,12 @@ const ProductList = () => {
                   />
                 </div>
               </div>
-              <div className="mt-6">
-                <button
-                  type="submit"
-                  className="w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
-                >
-                  Save Changes
-                </button>
-              </div>
+              <button
+                type="submit"
+                className="mt-6 w-full bg-green-500 text-white py-3 rounded-md text-lg font-semibold hover:bg-green-600"
+              >
+                Save Changes
+              </button>
             </form>
           </div>
         </div>
