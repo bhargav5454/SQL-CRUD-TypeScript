@@ -1,7 +1,25 @@
 {
-  "files": [],
-  "references": [
-    { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" }
-  ]
+  "compilerOptions": {
+    "target": "ES2023", // ECMAScript target version.
+    "useDefineForClassFields": true, // Use `defineProperty` for class fields.
+    "lib": ["ES2023", "DOM", "DOM.Iterable"], // Libraries to include.
+    "module": "ESNext", // Module code generation.
+    "skipLibCheck": true, // Skip type checking of declaration files.
+
+    /* Bundler mode */
+    "moduleResolution": "bundler", // Module resolution for bundlers.
+    "allowImportingTsExtensions": true, // Allow importing TypeScript files with extensions.
+    "isolatedModules": true, // Enable independent transpilation of files.
+    "moduleDetection": "force", // Treat every file as a module.
+    "noEmit": true, // Prevent emitting compiled JavaScript.
+    "jsx": "react-jsx", // JSX code generation for React.
+
+    /* Linting */
+    "strict": true, // Enable strict type-checking.
+    "noUnusedLocals": true, // Error for unused local.
+    "noUnusedParameters": true, // Error for unused function parameters.
+    "noFallthroughCasesInSwitch": true, // Error for fallthrough in switch cases.
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["src"] // Include all files in the src directory.
 }

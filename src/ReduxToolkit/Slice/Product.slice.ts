@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import apiRequest from "../../Services/Api.service";
+import apiRequest from "../../Services/Api.service.ts";
 import toast from "react-hot-toast";
 
 // Define the types for the product and the slice's state
