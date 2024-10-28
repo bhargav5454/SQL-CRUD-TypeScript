@@ -13,10 +13,9 @@ import {
 } from "../../ReduxToolkit/Slice/Product.slice";
 import { Edit, ShoppingCart, Trash2, X } from "lucide-react";
 import "./Product.css";
-import axios from "axios";
 import { AppDispatch } from "../../ReduxToolkit/Store/Store";
 import { RootState } from "../../ReduxToolkit/Store/Store"; // Ensure RootState is defined
-import apiRequest from "../../Services/Api.service";
+import { addCartItem,  fetchCartItems } from "../../ReduxToolkit/Slice/Cart.slice";
 
 interface FormData {
   id?: string; // Add 'id' to FormData to handle editing
@@ -47,6 +46,8 @@ const ProductList: React.FC = () => {
   const [cart, setCart] = useState<CartItem[]>([]);
   const dispatch = useDispatch<AppDispatch>();
   const product = useSelector((state: RootState) => state.productData.product);
+  const cartItems = useSelector((state: RootState) => state.cartData.cartItems);
+  console.log("🚀 ~ cartItems:", cartItems);
 
   useEffect(() => {
     dispatch(fetchProduct({ endpoint: "/product/getAll" }));
@@ -91,34 +92,45 @@ const ProductList: React.FC = () => {
       ),
     }));
   };
-
   const handleAddtoCart = (item: FormData) => {
-    const quantity = quantityCount[item.id!] || 1;
+    const quantity = quantityCount[item.id!] || 1; // Default to 1 if no quantity found
+  
     setCart((prev) => {
       const existingItem = prev.find((cartItem) => cartItem.id === item.id);
+  
       if (existingItem) {
+        // Update the quantity if the item already exists in the cart
         return prev.map((cartItem) =>
           cartItem.id === item.id
             ? { ...cartItem, cartQuantity: cartItem.cartQuantity + quantity }
             : cartItem
         );
       }
+  
+      // Add new item to the cart if it doesn't exist
       return [...prev, { ...item, cartQuantity: quantity }];
     });
+  
     setCartOpen(true);
+  
+    // Create payload with productId as a number
     const payload = {
-      productId: item.id,
-      quantity: quantityCount[item.id!] || 1,
+      productId: Number(item.id!), // Cast to number
+      quantity: quantity,
     };
-    axios.post("http://localhost:8001/v1/cart/add", payload, {
-      headers: {
-        Authorization:
-          "Bearer " +
-          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjhkMDgyY2UzLTRmMTAtNDVlNi04ZDZkLTZmOGVhZDI3MjhmOCIsImlhdCI6MTczMDA5MDY4MywiZXhwIjoxNzMwMDk0MjgzfQ.rivIlaHdAPmeeH-pnmT5EB6e8I1U659JB7anuUO81ME",
-        "x-custom-access-id": "8d082ce3-4f10-45e6-8d6d-6f8ead2728f8",
-      },
-    });
+  
+    // Dispatch the addCartItem thunk
+    dispatch(addCartItem({ endpoint: "/cart/add", payload }));
   };
+  
+
+  const fetchCart = () => {
+    dispatch(fetchCartItems({ endpoint: "/cart/get" }));
+  };
+
+  useEffect(() => {
+    fetchCart();
+  }, [dispatch]);
 
   const removeFromCart = async (productId: string) => {
     setCart((prev) => prev.filter((c) => c.id !== productId));
