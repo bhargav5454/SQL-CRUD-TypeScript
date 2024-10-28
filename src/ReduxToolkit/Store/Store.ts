@@ -3,6 +3,7 @@ import { persistStore, persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 import userReducer from "../Slice/User.slice";
 import productReducer from "../Slice/Product.slice";
+import CartReducer from "../Slice/Cart.slice";
 
 const persistConfig = {
     key: 'root',
@@ -15,7 +16,8 @@ const persistedReducer = persistReducer(persistConfig, userReducer);
 const reduxStore = configureStore({
     reducer: {
         user: persistedReducer,
-        productData: productReducer
+        productData: productReducer,
+        cartData: CartReducer,
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({
