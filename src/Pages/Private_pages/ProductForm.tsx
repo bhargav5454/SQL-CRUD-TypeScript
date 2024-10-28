@@ -3,7 +3,7 @@ import { useDispatch } from "react-redux";
 import { addproduct } from "../../ReduxToolkit/Slice/Product.slice";
 import { AppDispatch } from "../../ReduxToolkit/Store/Store";
 
-interface FormData {
+type FormData ={
   id?: string;
   name: string;
   description: string;
