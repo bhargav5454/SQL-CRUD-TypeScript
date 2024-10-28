@@ -1,15 +1,22 @@
-import React, { Fragment, useState, useEffect, ChangeEvent, FormEvent } from "react";
+import React, {
+  Fragment,
+  useState,
+  useEffect,
+  ChangeEvent,
+  FormEvent,
+} from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   deleteProduct,
   fetchProduct,
   updateProduct,
 } from "../../ReduxToolkit/Slice/Product.slice";
-import { Edit, Trash2, X } from "lucide-react";
+import { Edit, ShoppingCart, Trash2, X } from "lucide-react";
 import "./Product.css";
 import axios from "axios";
 import { AppDispatch } from "../../ReduxToolkit/Store/Store";
-import { RootState } from "../../ReduxToolkit/Store/Store"; // Make sure to define RootState in your store
+import { RootState } from "../../ReduxToolkit/Store/Store"; // Ensure RootState is defined
+import apiRequest from "../../Services/Api.service";
 
 interface FormData {
   id?: string; // Add 'id' to FormData to handle editing
@@ -20,6 +27,9 @@ interface FormData {
   category: string;
 }
 
+interface CartItem extends FormData {
+  cartQuantity: number;
+}
 const ProductList: React.FC = () => {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<FormData>({
@@ -29,6 +39,12 @@ const ProductList: React.FC = () => {
     quantity: 1,
     category: "",
   });
+  const [quantityCount, setQuantityCount] = useState<{ [key: string]: number }>(
+    {}
+  );
+
+  const [cartOpen, setCartOpen] = useState(false);
+  const [cart, setCart] = useState<CartItem[]>([]);
   const dispatch = useDispatch<AppDispatch>();
   const product = useSelector((state: RootState) => state.productData.product);
 
@@ -41,7 +57,9 @@ const ProductList: React.FC = () => {
     setEditModalOpen(true);
   };
 
-  const handleEditChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleEditChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     setEditingProduct({ ...editingProduct, [e.target.name]: e.target.value });
   };
 
@@ -61,24 +79,62 @@ const ProductList: React.FC = () => {
     dispatch(deleteProduct({ endpoint: "/product/delete", productId }));
   };
 
+  const handleQuantityChange = (productId: string, quantity: number) => {
+    setQuantityCount((prev) => ({
+      ...prev,
+      [productId]: Math.max(
+        1,
+        Math.min(
+          quantity,
+          product?.find((item) => item.id === productId)?.quantity || 1
+        )
+      ),
+    }));
+  };
+
   const handleAddtoCart = (item: FormData) => {
+    const quantity = quantityCount[item.id!] || 1;
+    setCart((prev) => {
+      const existingItem = prev.find((cartItem) => cartItem.id === item.id);
+      if (existingItem) {
+        return prev.map((cartItem) =>
+          cartItem.id === item.id
+            ? { ...cartItem, cartQuantity: cartItem.cartQuantity + quantity }
+            : cartItem
+        );
+      }
+      return [...prev, { ...item, cartQuantity: quantity }];
+    });
+    setCartOpen(true);
     const payload = {
       productId: item.id,
-      quantity: 1,
+      quantity: quantityCount[item.id!] || 1,
     };
     axios.post("http://localhost:8001/v1/cart/add", payload, {
       headers: {
         Authorization:
           "Bearer " +
-          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjhkMDgyY2UzLTRmMTAtNDVlNi04ZDZkLTZmOGVhZDI3MjhmOCIsImlhdCI6MTcyOTgzMTc5NCwiZXhwIjoxNzI5ODM1Mzk0fQ.ANbszrSVFQ3Us9wE13eLegIWpYF-JFwPdZ0s-5R9k9c",
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjhkMDgyY2UzLTRmMTAtNDVlNi04ZDZkLTZmOGVhZDI3MjhmOCIsImlhdCI6MTczMDA5MDY4MywiZXhwIjoxNzMwMDk0MjgzfQ.rivIlaHdAPmeeH-pnmT5EB6e8I1U659JB7anuUO81ME",
         "x-custom-access-id": "8d082ce3-4f10-45e6-8d6d-6f8ead2728f8",
       },
     });
   };
 
+  const removeFromCart = async (productId: string) => {
+    setCart((prev) => prev.filter((c) => c.id !== productId));
+  };
+
   return (
     <div className="container mx-auto p-6 max-w-7xl">
-      <h1 className="text-3xl font-bold mb-6">Product List</h1>
+      <div className="flex items-center mb-6 gap-6">
+        <h1 className="text-3xl font-bold ">Product List</h1>
+        <button className="flex" onClick={() => setCartOpen(true)}>
+          <ShoppingCart className="w-6 h-6" />
+          <span className=" bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
+            {cart.reduce((sum, item) => sum + item.cartQuantity, 0)}
+          </span>
+        </button>
+      </div>
       {product?.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {product?.map((item, ind) => (
@@ -109,8 +165,47 @@ const ProductList: React.FC = () => {
                     Category: {item.category}
                   </p>
                   <p className="text-sm text-gray-500">
-                    Quantity: {item.quantity}
+                    Available Quantity: {item.quantity}
                   </p>
+                  <div className="flex items-center mt-3 space-x-2">
+                    <button
+                      onClick={() =>
+                        handleQuantityChange(
+                          item.id!,
+                          (quantityCount[item.id!] || 1) - 1
+                        )
+                      }
+                      disabled={(quantityCount[item.id!] || 1) <= 1}
+                      className="px-3 py-1 bg-gray-200 rounded-full"
+                    >
+                      -
+                    </button>
+                    <input
+                      type="number"
+                      min="1"
+                      max={item.quantity}
+                      value={quantityCount[item.id!] || 1}
+                      onChange={(e) =>
+                        handleQuantityChange(
+                          item.id!,
+                          parseInt(e.target.value) || 1
+                        )
+                      }
+                      className="w-16 text-center border border-gray-300 rounded-lg"
+                    />
+                    <button
+                      onClick={() =>
+                        handleQuantityChange(
+                          item.id!,
+                          (quantityCount[item.id!] || 1) + 1
+                        )
+                      }
+                      disabled={(quantityCount[item.id!] || 1) >= item.quantity}
+                      className="px-3 py-1 bg-gray-200 rounded-full"
+                    >
+                      +
+                    </button>
+                  </div>
                   <p className="text-2xl font-bold mt-4">
                     ${item.price.toFixed(2)}
                   </p>
@@ -147,7 +242,10 @@ const ProductList: React.FC = () => {
             <form onSubmit={handleEditSubmit} className="p-6">
               <div className="space-y-4">
                 <div>
-                  <label htmlFor="edit-name" className="block text-sm font-medium text-gray-700">
+                  <label
+                    htmlFor="edit-name"
+                    className="block text-sm font-medium text-gray-700"
+                  >
                     Name
                   </label>
                   <input
@@ -160,7 +258,10 @@ const ProductList: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label htmlFor="edit-description" className="block text-sm font-medium text-gray-700">
+                  <label
+                    htmlFor="edit-description"
+                    className="block text-sm font-medium text-gray-700"
+                  >
                     Description
                   </label>
                   <textarea
@@ -173,7 +274,10 @@ const ProductList: React.FC = () => {
                   ></textarea>
                 </div>
                 <div>
-                  <label htmlFor="edit-price" className="block text-sm font-medium text-gray-700">
+                  <label
+                    htmlFor="edit-price"
+                    className="block text-sm font-medium text-gray-700"
+                  >
                     Price
                   </label>
                   <input
@@ -186,7 +290,10 @@ const ProductList: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label htmlFor="edit-category" className="block text-sm font-medium text-gray-700">
+                  <label
+                    htmlFor="edit-category"
+                    className="block text-sm font-medium text-gray-700"
+                  >
                     Category
                   </label>
                   <select
@@ -205,7 +312,10 @@ const ProductList: React.FC = () => {
                   </select>
                 </div>
                 <div>
-                  <label htmlFor="edit-quantity" className="block text-sm font-medium text-gray-700">
+                  <label
+                    htmlFor="edit-quantity"
+                    className="block text-sm font-medium text-gray-700"
+                  >
                     Quantity
                   </label>
                   <input
@@ -228,6 +338,67 @@ const ProductList: React.FC = () => {
           </div>
         </div>
       )}
+      <div
+        className={`fixed inset-y-0 right-0 w-full sm:w-96 bg-white shadow-lg transform ${
+          cartOpen ? "translate-x-0" : "translate-x-full"
+        } transition-transform duration-300 ease-in-out z-50`}
+      >
+        <div className="h-full flex flex-col">
+          <div className="flex justify-between items-center p-4 border-b">
+            <h2 className="text-xl font-bold">Your Cart</h2>
+            <button
+              onClick={() => setCartOpen(false)}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              <X size={24} />
+            </button>
+          </div>
+          <div className="flex-grow overflow-y-auto p-4">
+            {cart.length === 0 ? (
+              <p className="text-center text-gray-500">Your cart is empty.</p>
+            ) : (
+              cart.map((item) => (
+                <div
+                  key={item.id}
+                  className="flex justify-between items-center py-4 border-b"
+                >
+                  <div>
+                    <h3 className="font-semibold">{item.name}</h3>
+                    <p className="text-sm text-gray-600">
+                      Quantity: {item.cartQuantity}
+                    </p>
+                    <p className="text-sm font-semibold">
+                      ${(item.price * item.cartQuantity).toFixed(2)}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => removeFromCart(item.id!)}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
+          {cart.length > 0 && (
+            <div className="p-4 border-t">
+              <p className="text-xl font-bold mb-4">
+                Total: $
+                {cart
+                  .reduce(
+                    (sum, item) => sum + item.price * item.cartQuantity,
+                    0
+                  )
+                  .toFixed(2)}
+              </p>
+              <button className="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 transition duration-300">
+                Checkout
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
