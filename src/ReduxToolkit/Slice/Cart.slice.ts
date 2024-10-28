@@ -91,7 +91,6 @@ const cartSlice = createSlice({
         addCartItem.fulfilled,
         (state, action: PayloadAction<{ data: CartItem }>) => {
           state.loading = false; 
-          console.log("🚀 ~ action.payload.data:", action.payload.data)
           state.cartItems = [...state.cartItems, action.payload.data];
         } 
       )
@@ -104,7 +103,7 @@ const cartSlice = createSlice({
       })
       .addCase(fetchCartItems.fulfilled, (state, action) => {
         state.loading = false; 
-        state.cartItems = action.payload; 
+        state.cartItems = action.payload.data; 
       })
       .addCase(fetchCartItems.rejected, (state, action) => {
         state.loading = false; 

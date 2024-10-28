@@ -142,7 +142,7 @@ const ProductList: React.FC = () => {
         <h1 className="text-3xl font-bold ">Product List</h1>
         <button className="flex" onClick={() => setCartOpen(true)}>
           <ShoppingCart className="w-6 h-6" />
-          <span className=" bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
+          <span className=" bg-red-500 text-white rounded-full p-1 w-auto h-5 flex items-center justify-center text-xs">
             {cart.reduce((sum, item) => sum + item.cartQuantity, 0)}
           </span>
         </button>
