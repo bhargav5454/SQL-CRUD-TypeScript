@@ -4,28 +4,28 @@ import toast from "react-hot-toast";
 
 // Define the structure of a product
 interface Product {
-  id: number; // Product ID
-  name: string; // Product name
-  description: string; // Product description
-  price: number; // Product price
+  id: number; 
+  name: string; 
+  description: string; 
+  price: number; 
 }
 
 // Define the structure of a cart item
 interface CartItem {
-  id: number; // Cart item ID
-  product: Product; // Product details
-  productId: number; // Associated product ID
-  quantity: number; // Quantity of the product in the cart
-  createdAt: string; // Timestamp of when the item was created
-  createdBy: string; // User who created the cart item
-  updatedAt: string; // Timestamp of when the item was last updated
+  id: number; 
+  product: Product; 
+  productId: number; 
+  quantity: number; 
+  createdAt: string; 
+  createdBy: string; 
+  updatedAt: string; 
 }
 
-// Define the structure of the cart state
+
 interface Cart {
-  cartItems: CartItem[]; // Array of cart items
-  loading: boolean; // Loading state
-  error: string | null; // Error state
+  cartItems: CartItem[]; 
+  loading: boolean; 
+  error: string | null; 
 }
 
 // Initial state for the cart
@@ -39,8 +39,8 @@ const initialState: Cart = {
 interface AddCartItemPayload {
   endpoint: string;
   payload: {
-    productId: number; // Required product ID
-    quantity: number; // Required quantity
+    productId: number; 
+    quantity: number; 
   };
 }
 
@@ -52,7 +52,7 @@ export const addCartItem = createAsyncThunk(
       const { endpoint, payload } = data;
       const res = await apiRequest.post(endpoint, payload);
       toast.success(res.data.message);
-      return res.data; // Assuming this returns the full cart item
+      return res.data; 
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || error.message;
       toast.error(errorMessage);
@@ -61,14 +61,14 @@ export const addCartItem = createAsyncThunk(
   }
 );
 
-// Async thunk for fetching cart items
+
 export const fetchCartItems = createAsyncThunk(
   "cart/fetchCartItems",
   async (data: { endpoint: string }, { rejectWithValue }) => {
     try {
       const { endpoint } = data;
       const res = await apiRequest.get(endpoint);
-      return res.data; // Assuming the response data is the cart items
+      return res.data; 
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || error.message;
       toast.error(errorMessage);
@@ -85,33 +85,33 @@ const cartSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(addCartItem.pending, (state) => {
-        state.loading = true; // Set loading to true when adding an item
+        state.loading = true; 
       })
       .addCase(
         addCartItem.fulfilled,
         (state, action: PayloadAction<{ data: CartItem }>) => {
-          state.loading = false; // Set loading to false on success
+          state.loading = false; 
           console.log("🚀 ~ action.payload.data:", action.payload.data)
-          state.cartItems = [...state.cartItems, action.payload.data];// Add the new cart item
-        }
+          state.cartItems = [...state.cartItems, action.payload.data];
+        } 
       )
       .addCase(addCartItem.rejected, (state, action) => {
-        state.loading = false; // Set loading to false on failure
-        state.error = action.payload as string; // Store the error message
+        state.loading = false; 
+        state.error = action.payload as string; 
       })
       .addCase(fetchCartItems.pending, (state) => {
-        state.loading = true; // Set loading to true when fetching items
+        state.loading = true; 
       })
       .addCase(fetchCartItems.fulfilled, (state, action) => {
-        state.loading = false; // Set loading to false on success
-        state.cartItems = action.payload; // Replace cart items with fetched items
+        state.loading = false; 
+        state.cartItems = action.payload; 
       })
       .addCase(fetchCartItems.rejected, (state, action) => {
-        state.loading = false; // Set loading to false on failure
-        state.error = action.payload as string; // Store the error message
+        state.loading = false; 
+        state.error = action.payload as string; 
       });
   },
 });
 
-// Export the reducer to be used in the store
+
 export default cartSlice.reducer;
