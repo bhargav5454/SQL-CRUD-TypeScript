@@ -1,8 +1,11 @@
+import React from "react";
 
-const Home = () => {
+const Home: React.FC = () => {
   return (
-    <div>Home</div>
-  )
-}
+    <>
+      <h1 className="container m-auto text-center ">welcome to home</h1>
+    </>
+  );
+};
 
-export default Home
+export default Home;

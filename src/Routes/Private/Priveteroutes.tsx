@@ -5,7 +5,7 @@ import Navbar from "../../Components/Navbar";
 import Errorpage from "../../Components/Errorpage";
 import Product from "../../Pages/Private_pages/Product";
 import { useSelector } from "react-redux";
-import SessionExpiredPopup from "../../Components/Sessionex";
+import SessionExpiredPopup from "../../Components/Sessione";
 import ProductForm from "../../Pages/Private_pages/ProductForm";
 
 const PrivateRoutes = () => {
